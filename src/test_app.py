@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from litestar.testing import TestClient
 from yoyo import get_backend, read_migrations
@@ -15,10 +13,11 @@ def client(tmp_path):
     with backend.lock():
         backend.apply_migrations(backend.to_apply(migrations))
 
-    os.environ["DATABASE_URL"] = str(db_file)
-    from app import app
+    from app import create_app
 
-    with TestClient(app=app) as client:
+    test_app = create_app(db_url=str(db_file))
+
+    with TestClient(app=test_app) as client:
         yield client
 
 

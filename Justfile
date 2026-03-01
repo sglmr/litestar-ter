@@ -25,9 +25,10 @@ test:
 
 # Run Astral's ty type checker
 check:
-	uv run ruff check
-	uv run ruff format
+	uv run ruff check --fix 
+	uv run ruff format 
 	uv run ty check
+	
 
 
 format:

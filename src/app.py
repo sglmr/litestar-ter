@@ -212,32 +212,44 @@ async def favicon() -> Response:
 
 
 # --- APP INIT ---
-app = Litestar(
-    route_handlers=[
-        favicon,
-        index,
-        login_page,
-        process_login,
-        logout,
-        secure_page,
-        add_user,
-        create_static_files_router(path="/static", directories=["static"]),
-    ],
-    compression_config=CompressionConfig(backend="gzip", gzip_compress_level=9),
-    lifespan=[db_connection],
-    dependencies={
-        "db": Provide(provide_db_conn),
-        "user_repo": Provide(provide_user_repo),
-    },
-    template_config=template_config,
-    logging_config=logging_config,
-    csrf_config=CSRFConfig(
-        secret=secret_key,
-        cookie_name="x-csrftoken",
-        cookie_secure=False,
-        cookie_httponly=False,
-    ),
-    middleware=[session_config.middleware],
-    debug=DEBUG,
-    exception_handlers=exception_handlers,
-)
+
+
+def create_app(db_url: str | None = None) -> Litestar:
+    # If a db_url is passed (from tests), you can inject it
+    # into your provide_db_conn or set the environment here.
+    if db_url:
+        os.environ["DATABASE_URL"] = db_url
+
+    return Litestar(
+        route_handlers=[
+            favicon,
+            index,
+            login_page,
+            process_login,
+            logout,
+            secure_page,
+            add_user,
+            create_static_files_router(path="/static", directories=["static"]),
+        ],
+        compression_config=CompressionConfig(backend="gzip", gzip_compress_level=9),
+        lifespan=[db_connection],
+        dependencies={
+            "db": Provide(provide_db_conn),
+            "user_repo": Provide(provide_user_repo),
+        },
+        template_config=template_config,
+        logging_config=logging_config,
+        csrf_config=CSRFConfig(
+            secret=secret_key,
+            cookie_name="x-csrftoken",
+            cookie_secure=False,
+            cookie_httponly=False,
+        ),
+        middleware=[session_config.middleware],
+        debug=DEBUG,
+        exception_handlers=exception_handlers,
+    )
+
+
+# Keep this for your production ASGI server (uvicorn src.app:app)
+app = create_app()

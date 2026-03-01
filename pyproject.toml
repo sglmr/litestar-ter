@@ -25,3 +25,4 @@ dev = [
 
 [tool.ty.environment]
 root = ["./src"]
+python = "./.venv"
