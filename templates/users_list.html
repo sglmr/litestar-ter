@@ -1,0 +1,7 @@
+<ul id="user-list" class="space-y-2 border rounded p-4 bg-gray-50">
+    {% for user in users %}
+        <li class="p-2 bg-white shadow-sm rounded border">{{ user.id }}: {{ user.username }}</li>
+    {% else %}
+        <li class="text-gray-500 italic">No users in database.</li>
+    {% endfor %}
+</ul>

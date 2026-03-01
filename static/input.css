@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@plugin '@tailwindcss/typography';
+
+@source "../templates/**/*.html";
+@source "../src/**/*.py";
+
+/* Base Layer: For raw HTML elements */
+@layer base {}
+
+/* Components Layer: For reusable class bundles */
+@layer components {}
+
+/* Utilities Layer: For custom helper classes */
+@layer utilities {}
