@@ -33,6 +33,7 @@ from litestar.status_codes import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from litestar.template.config import TemplateConfig
+from litestar.middleware.logging import LoggingMiddlewareConfig
 
 from helpers import rand_id, send_email_async
 from repository import UserRepository
@@ -53,6 +54,9 @@ logging_config = LoggingConfig(
         }
     },
 )
+
+logging_middleware_config = LoggingMiddlewareConfig()
+
 
 # --- TEMPLATE CONFIG ---
 template_config: TemplateConfig = TemplateConfig(
@@ -245,7 +249,7 @@ def create_app(db_url: str | None = None) -> Litestar:
             cookie_secure=False,
             cookie_httponly=False,
         ),
-        middleware=[session_config.middleware],
+        middleware=[logging_middleware_config.middleware, session_config.middleware],
         debug=DEBUG,
         exception_handlers=exception_handlers,
     )

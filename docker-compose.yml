@@ -10,6 +10,7 @@ services:
     environment:
       - DEBUG=True
       - DATABASE_URL=app.sqlite
+      - PYTHONPATH=/app/src
     command: uv run uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
 
   tailwind:

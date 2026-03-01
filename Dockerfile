@@ -12,6 +12,7 @@ WORKDIR /app
 COPY pyproject.toml .
 RUN uv sync --no-dev
 COPY . .
+ENV PYTHONPATH="/app/src"
 
 FROM base AS dev
 EXPOSE 8000
@@ -19,4 +20,5 @@ EXPOSE 8000
 FROM base AS prod
 COPY --from=css-builder /app/static/style.css ./static/style.css
 EXPOSE 8000
+
 CMD ["uv", "run", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
