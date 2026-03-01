@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Debugging Exception{% endblock %}
+
+{% block content %}
+<div class="prose">
+    <h2>Exception:</h2>
+    <div>{{ exception }}</div>
+</div>
+<div>
+    <h2 class="prose">Traceback:</h2>
+    <div>
+        {{ traceback|safe }}
+    </div>
+</div>
+{% endblock %}

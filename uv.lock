@@ -397,7 +397,7 @@ wheels = [
 ]
 
 [[package]]
-name = "litestar-htmx-tailwind"
+name = "litestar-ter"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -5,6 +5,10 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
+from io import StringIO
+
+from rich.console import Console
+
 import aiosqlite
 from dotenv import load_dotenv
 from litestar import Litestar, Request, Response, get, post
@@ -23,7 +27,11 @@ from litestar.middleware.session.client_side import CookieBackendConfig
 from litestar.params import Body
 from litestar.response import Redirect, Template
 from litestar.static_files import create_static_files_router
-from litestar.status_codes import HTTP_200_OK
+from litestar.status_codes import (
+    HTTP_200_OK,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from litestar.template.config import TemplateConfig
 
 from helpers import rand_id, send_email_async
@@ -98,13 +106,35 @@ async def process_new_user_background(username: str, email: str):
 
 
 # --- EXCEPTION HANDLERS ---
-def handle_404(request: Request, exc: Exception) -> Response:
+def handle_404(request: Request, exc: Exception) -> Template:
     return Template(template_name="404.html", status_code=404)
 
 
 def handle_500(request: Request, exc: Exception) -> Template:
     request.logger.error("Internal Server Error", exc_info=exc)
     return Template(template_name="500.html", status_code=500)
+
+
+def handle_debug_exceptions(request: Request, exc: Exception) -> Template:
+
+    console = Console(file=StringIO(), force_terminal=True, width=100, record=True)
+    console.print_exception(show_locals=True)
+    traceback_str = console.export_html(inline_styles=True)
+
+    return Template(
+        template_name="debug_exception.html.jinja2",
+        context={"exception": str(exc), "traceback": traceback_str},
+        status_code=500,
+    )
+
+
+exception_handlers = {
+    HTTP_404_NOT_FOUND: handle_404,
+    HTTP_500_INTERNAL_SERVER_ERROR: handle_500,
+}
+
+if DEBUG:
+    exception_handlers = {Exception: handle_debug_exceptions}
 
 
 # --- ROUTES ---
@@ -209,5 +239,5 @@ app = Litestar(
     ),
     middleware=[session_config.middleware],
     debug=DEBUG,
-    exception_handlers={404: handle_404, 500: handle_500} if not DEBUG else {},
+    exception_handlers=exception_handlers,
 )

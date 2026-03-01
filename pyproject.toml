@@ -1,5 +1,5 @@
 [project]
-name = "litestar-htmx-tailwind"
+name = "litestar-ter"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
@@ -10,7 +10,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
     "aiosmtplib>=3.0.0",
-    "click>=8.0.0"
+    "click>=8.0.0",
 ]
 
 [dependency-groups]

@@ -25,7 +25,13 @@ test:
 
 # Run Astral's ty type checker
 check:
+	uv run ruff check
+	uv run ruff format
 	uv run ty check
+
+
+format:
+	uv run ruff format
 
 # Create a database user via CLI
 create-user name:

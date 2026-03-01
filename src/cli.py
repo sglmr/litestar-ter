@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 async def create_db_user(username: str):
     db_path = os.getenv("DATABASE_URL", "app.sqlite")
     async with aiosqlite.connect(db_path) as conn:
@@ -16,14 +17,17 @@ async def create_db_user(username: str):
         except Exception as e:
             click.secho(f"Error creating user: {e}", fg="red")
 
+
 @click.group()
 def cli():
     pass
 
+
 @cli.command()
-@click.argument('username')
+@click.argument("username")
 def create_user(username):
     asyncio.run(create_db_user(username))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()
