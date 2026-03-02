@@ -5,6 +5,7 @@ from yoyo import get_backend, read_migrations
 
 @pytest.fixture
 def client(tmp_path):
+
     db_file = tmp_path / "test_db.sqlite"
     db_url = f"sqlite:///{db_file}"
 
@@ -15,10 +16,15 @@ def client(tmp_path):
 
     from app import create_app
 
-    test_app = create_app(db_url=str(db_file))
+    test_app = create_app(debug=False, db_url=str(db_file))
 
     with TestClient(app=test_app) as client:
         yield client
+
+
+def test_app_debug_is_false(client):
+    """Verify that the app is NOT in debug mode during tests."""
+    assert client.app.debug is False
 
 
 def test_login_flow(client):

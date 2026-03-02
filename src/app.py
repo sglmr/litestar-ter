@@ -63,14 +63,6 @@ template_config: TemplateConfig = TemplateConfig(
     directory=templates_path,
     engine=JinjaTemplateEngine,
 )
-browser_reload = BrowserReloadPlugin(
-    watch_paths=(templates_path, Path("static")),
-    watch_filter=DefaultFilter(ignore_dirs=(".git", ".hg", ".svn", ".tox")),
-)
-
-# TODO: Figure out how to use the flash plugin
-flash_plugin = FlashPlugin(config=FlashConfig(template_config=template_config))
-problem_details_plugin = ProblemDetailsPlugin(ProblemDetailsConfig())
 
 
 # --- DATABASE SETUP ---
@@ -230,6 +222,19 @@ def create_app(debug: bool = False, db_url: str | None = None) -> Litestar:
     if db_url:
         os.environ["DATABASE_URL"] = db_url
 
+    # --- PLUGINS ---
+    # TODO: Figure out how to use the flash plugin
+    flash_plugin = FlashPlugin(config=FlashConfig(template_config=template_config))
+    problem_details_plugin = ProblemDetailsPlugin(ProblemDetailsConfig())
+    plugins = [flash_plugin, problem_details_plugin]
+    if debug:
+        plugins.append(
+            BrowserReloadPlugin(
+                watch_paths=(templates_path, Path("static")),
+                watch_filter=DefaultFilter(ignore_dirs=(".git", ".hg", ".svn", ".tox")),
+            )
+        )
+
     app = Litestar(
         route_handlers=[
             favicon,
@@ -255,6 +260,7 @@ def create_app(debug: bool = False, db_url: str | None = None) -> Litestar:
             cookie_secure=False,
             cookie_httponly=False,
         ),
+        plugins=plugins,
         middleware=[logging_middleware_config.middleware, session_config.middleware],
         debug=debug,
         exception_handlers=exception_handlers,
@@ -265,5 +271,4 @@ def create_app(debug: bool = False, db_url: str | None = None) -> Litestar:
 
 # Keep this for your production ASGI server (uvicorn src.app:app)
 load_dotenv()
-DEBUG = os.environ["DEBUG"].lower() is True
-app = create_app()
+app = create_app(debug=os.getenv("DEBUG", "False").lower() == "true")
