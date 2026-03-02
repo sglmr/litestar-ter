@@ -132,6 +132,8 @@ def handle_exception(request: Request, exc: Exception) -> Template:
             context={"exception": str(exc), "traceback": traceback_str},
             status_code=500,
         )
+    # TODO: Prod exception
+    return Template(template_name="500.html", status_code=500)
 
 
 exception_handlers = {
