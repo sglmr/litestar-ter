@@ -40,9 +40,6 @@ from watchfiles import DefaultFilter
 from helpers import rand_id, send_email_async
 from repository import UserRepository
 
-load_dotenv()
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-
 # --- LOGGING ---
 logging_config = LoggingConfig(
     root={"level": "INFO", "handlers": ["console"]},
@@ -131,26 +128,25 @@ def handle_500(request: Request, exc: Exception) -> Template:
     return Template(template_name="500.html", status_code=500)
 
 
-def handle_debug_exceptions(request: Request, exc: Exception) -> Template:
+def handle_exception(request: Request, exc: Exception) -> Template:
 
-    console = Console(file=StringIO(), force_terminal=True, width=100, record=True)
-    console.print_exception(show_locals=True)
-    traceback_str = console.export_html(inline_styles=True)
+    if request.app.debug:
+        console = Console(file=StringIO(), force_terminal=True, width=100, record=True)
+        console.print_exception(show_locals=True)
+        traceback_str = console.export_html(inline_styles=True)
 
-    return Template(
-        template_name="debug_exception.html.jinja2",
-        context={"exception": str(exc), "traceback": traceback_str},
-        status_code=500,
-    )
+        return Template(
+            template_name="debug_exception.html.jinja2",
+            context={"exception": str(exc), "traceback": traceback_str},
+            status_code=500,
+        )
 
 
 exception_handlers = {
     HTTP_404_NOT_FOUND: handle_404,
     HTTP_500_INTERNAL_SERVER_ERROR: handle_500,
+    Exception: handle_exception,
 }
-
-if DEBUG:
-    exception_handlers = {Exception: handle_debug_exceptions}
 
 
 # --- ROUTES ---
@@ -228,7 +224,7 @@ async def favicon() -> Response:
 
 
 # --- APP INIT ---
-def create_app(db_url: str | None = None) -> Litestar:
+def create_app(debug: bool = False, db_url: str | None = None) -> Litestar:
     # If a db_url is passed (from tests), you can inject it
     # into your provide_db_conn or set the environment here.
     if db_url:
@@ -260,8 +256,7 @@ def create_app(db_url: str | None = None) -> Litestar:
             cookie_httponly=False,
         ),
         middleware=[logging_middleware_config.middleware, session_config.middleware],
-        debug=DEBUG,
-        plugins=[browser_reload, flash_plugin, problem_details_plugin],
+        debug=debug,
         exception_handlers=exception_handlers,
     )
 
@@ -269,4 +264,6 @@ def create_app(db_url: str | None = None) -> Litestar:
 
 
 # Keep this for your production ASGI server (uvicorn src.app:app)
+load_dotenv()
+DEBUG = os.environ["DEBUG"].lower() is True
 app = create_app()
