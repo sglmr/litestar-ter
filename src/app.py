@@ -2,12 +2,9 @@ import logging
 import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from io import StringIO
 from pathlib import Path
 from typing import Annotated
-
-from io import StringIO
-
-from rich.console import Console
 
 import aiosqlite
 from dotenv import load_dotenv
@@ -23,8 +20,11 @@ from litestar.enums import RequestEncodingType
 from litestar.exceptions import NotAuthorizedException
 from litestar.handlers import BaseRouteHandler
 from litestar.logging.config import LoggingConfig
+from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.middleware.session.client_side import CookieBackendConfig
 from litestar.params import Body
+from litestar.plugins.flash import FlashConfig, FlashPlugin
+from litestar.plugins.problem_details import ProblemDetailsConfig, ProblemDetailsPlugin
 from litestar.response import Redirect, Template
 from litestar.static_files import create_static_files_router
 from litestar.status_codes import (
@@ -33,7 +33,9 @@ from litestar.status_codes import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from litestar.template.config import TemplateConfig
-from litestar.middleware.logging import LoggingMiddlewareConfig
+from litestar_browser_reload import BrowserReloadPlugin
+from rich.console import Console
+from watchfiles import DefaultFilter
 
 from helpers import rand_id, send_email_async
 from repository import UserRepository
@@ -59,9 +61,19 @@ logging_middleware_config = LoggingMiddlewareConfig()
 
 
 # --- TEMPLATE CONFIG ---
+templates_path = Path("templates")
 template_config: TemplateConfig = TemplateConfig(
-    directory=Path("templates"), engine=JinjaTemplateEngine
+    directory=templates_path,
+    engine=JinjaTemplateEngine,
 )
+browser_reload = BrowserReloadPlugin(
+    watch_paths=(templates_path, Path("static")),
+    watch_filter=DefaultFilter(ignore_dirs=(".git", ".hg", ".svn", ".tox")),
+)
+
+# TODO: Figure out how to use the flash plugin
+flash_plugin = FlashPlugin(config=FlashConfig(template_config=template_config))
+problem_details_plugin = ProblemDetailsPlugin(ProblemDetailsConfig())
 
 
 # --- DATABASE SETUP ---
@@ -216,15 +228,13 @@ async def favicon() -> Response:
 
 
 # --- APP INIT ---
-
-
 def create_app(db_url: str | None = None) -> Litestar:
     # If a db_url is passed (from tests), you can inject it
     # into your provide_db_conn or set the environment here.
     if db_url:
         os.environ["DATABASE_URL"] = db_url
 
-    return Litestar(
+    app = Litestar(
         route_handlers=[
             favicon,
             index,
@@ -251,8 +261,11 @@ def create_app(db_url: str | None = None) -> Litestar:
         ),
         middleware=[logging_middleware_config.middleware, session_config.middleware],
         debug=DEBUG,
+        plugins=[browser_reload, flash_plugin, problem_details_plugin],
         exception_handlers=exception_handlers,
     )
+
+    return app
 
 
 # Keep this for your production ASGI server (uvicorn src.app:app)

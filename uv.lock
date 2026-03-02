@@ -388,6 +388,19 @@ standard = [
 ]
 
 [[package]]
+name = "litestar-browser-reload"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "litestar", extra = ["standard"] },
+    { name = "watchfiles" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f7/9b/6cdc16dfba59732ef87ced9aceba9be839c0d250e8a7a7136ae6df124726/litestar_browser_reload-0.3.0.tar.gz", hash = "sha256:85fa3dab9ed9d00a2f6a880914e1184fa5553812728c47cb20e42a489c1f14c7", size = 83050, upload-time = "2024-12-21T19:06:18.428Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/a2/b7051a7d2382adade95a29bcd597a6971123b33d783bcf9e548a2f3d8fb0/litestar_browser_reload-0.3.0-py3-none-any.whl", hash = "sha256:379c59973711d7ce8c75f09789b779684973b982f119c76fa29b2543127ea242", size = 6482, upload-time = "2024-12-21T19:06:16.693Z" },
+]
+
+[[package]]
 name = "litestar-htmx"
 version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -405,6 +418,7 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "click" },
     { name = "litestar", extra = ["cryptography", "jinja", "standard"] },
+    { name = "litestar-browser-reload" },
     { name = "python-dotenv" },
     { name = "rich" },
     { name = "uvicorn", extra = ["standard"] },
@@ -427,6 +441,7 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "click", specifier = ">=8.0.0" },
     { name = "litestar", extras = ["jinja", "standard", "cryptography"], specifier = ">=2.0.0" },
+    { name = "litestar-browser-reload", specifier = ">=0.3.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.27.0" },

@@ -4,6 +4,5 @@ __pycache__/
 app.sqlite
 app.sqlite-wal
 app.sqlite-shm
-static/style.css
 .pytest_cache/
 node_modules/

@@ -1,27 +1,25 @@
 services:
   app:
-    build: 
+    build:
       context: .
       target: dev
     ports:
       - "8000:8000"
     volumes:
       - .:/app
-    environment:
-      - DEBUG=True
-      - DATABASE_URL=app.sqlite
-      - PYTHONPATH=/app/src
-    command: uv run uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
+    env_file: .env
+    tmpfs:
+      - /tmp/app_cache:size=512M,mode=1777
 
   tailwind:
     image: node:slim
     working_dir: /app
-    tty: true           # <--- This simulates a terminal
-    stdin_open: true    # <--- This keeps the input stream open
+    tty: true           
+    stdin_open: true
     volumes:
       - .:/app
-      - /app/node_modules  # <--- CRITICAL: Keeps Linux modules separate from Mac
+      - /app/node_modules
     command: >
-      sh -c "npm install && npx @tailwindcss/cli --input /app/static/input.css --output /app/static/style.css --watch"
+      sh -c "npm install && npx @tailwindcss/cli --input ./static/tailwind.css --output ./static/style.css --watch"
     depends_on:
       - app

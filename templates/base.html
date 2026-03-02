@@ -9,16 +9,27 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/favicon.ico" type="image/svg+xml">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    {% if request.app.debug %}
+    <!-- https://github.com/Tobi-De/litestar-browser-reload -->
+    <script
+        src="/__reload__/static/reload-listener.js"
+        data-worker-script-path="/__reload__/static/reload-worker.js"
+        data-ws-path="/__reload__"
+        defer
+    ></script>
+    {% endif %}
+
 </head>
 
 <body hx-headers='{"x-csrf-token": "{{ csrf_token() | safe }}"}' class="max-w-3xl p-1 mx-auto bg-slate-50">
-    
+
     <header class="p-4 bg-sky-800 rounded-t-2xl shadow-sm">
         <div class="text-2xl mb-4 ml-2 font-semibold tracking-wide text-white">NitroApp</div>
         <nav>
             <ul class="list-none flex flex-wrap items-center gap-x-3 gap-y-2 lowercase tracking-wide">
                 <li><a href="/login" class="shadow-md rounded-t-lg bg-stone-50 hover:bg-blue-100 py-1 px-3 block">Login</a></li>
-                
+
                 {% if username %}
                 <li><a href="/secure" class="shadow-md rounded-t-lg bg-stone-50 hover:bg-blue-100 py-1 px-3 block">Dashboard</a></li>
                 <li>
@@ -39,7 +50,7 @@
     <footer class="border-t border-slate-200 pt-8 pb-12">
         <div class="flex flex-col items-center gap-4">
             <span class="text-sm font-semibold text-slate-500 uppercase tracking-widest">NitroApp 2026</span>
-            
+
             <div class="flex gap-x-6 text-slate-400">
                 <a href="https://github.com" class="hover:text-slate-600 transition">Github</a>
                 <a href="#" class="hover:text-slate-600 transition">RSS</a>
